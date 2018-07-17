@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <style>
+        main {
+            visibility: hidden;
+        }
+    </style>
+
+    <title>&nbsp;</title>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const elIconLink = document.createElement("link");
+        const elMetaRefresh = document.createElement("meta");
+
+        if (urlParams.has("to") && urlParams.has("icon")) {
+            // Show favicons and redirect
+            const strIconData = decodeURIComponent(urlParams.get("icon"));
+            const strUrl = decodeURIComponent(urlParams.get("to"));
+
+            elIconLink.rel = "icon";
+            elIconLink.type = "image/x-icon";
+            elIconLink.href = strIconData;
+
+            elMetaRefresh.httpEquiv = "refresh";
+            elMetaRefresh.content = "0; URL=" + strUrl;
+
+            document.writeln(elIconLink.outerHTML);
+            document.writeln(elMetaRefresh.outerHTML);
+
+            window.location.href = strUrl;
+        }
+    </script>
+</head>
+<body>
+    <main>
+        <form id="file_form" runat="server">
+            <input type="file" id="file" accept="image/*" />
+            <input type="text" id="target" />
+            <textarea id="uri"></textarea>
+        </form>
+    </main>
+
+    <script>
+        if (!urlParams.has("to") || !urlParams.has("icon")) {
+            // Render bookmark creator UI
+            const elFileInput = document.querySelector("#file");
+            const elTargetInput = document.querySelector("#target");
+            const elTextarea = document.querySelector("#uri");
+
+            document.querySelector("main").style.visibility = "visible";
+
+            elFileInput.addEventListener("change", function onChange(event) {
+                if (elTargetInput.value.length > 3 &&
+                    elFileInput.files &&
+                    elFileInput.files.length) {
+                    
+                    const reader = new FileReader();
+                    const file = elFileInput.files[0];
+
+                    reader.addEventListener(
+                        "loadend",
+                        function onLoadEnd(event) {
+                            elTextarea.value =
+                                window.location +
+                                "?to=" +
+                                encodeURIComponent(elTargetInput.value) +
+                                "&icon=" +
+                                encodeURIComponent(reader.result);
+                    });
+
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
